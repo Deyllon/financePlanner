@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Profile {
+  EQUILIBRIO // Usuário que busca um equilíbrio entre trabalho e lazer, sem grandes riscos
+  AMBICIOSO // Usuário que está disposto a correr riscos controlados para alcançar objetivos
+  DETERMINADO // Usuário que aceita grandes sacrifícios em nome de grandes objetivos
+}
+
+enum OperationType {
+  CREDIT
+  DEBIT
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  name       String
+  email      String      @unique
+  password   String
+  profile    Profile
+  operations Operation[]
+  goals      Goal[]
+  report     Report[]
+  active     Boolean     @default(true)
+}
+
+model Operation {
+  id          Int           @id @default(autoincrement())
+  type        OperationType
+  value       Float
+  date        DateTime
+  user_id     Int
+  category    String
+  operationId String        @unique
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Goal {
+  id       Int      @id @default(autoincrement())
+  user_id  Int
+  name     String
+  deadline DateTime
+  value    Float
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Report {
+  id      Int      @id @default(autoincrement())
+  user_id Int
+  date    DateTime
+  plan    String
+
+  user User @relation(fields: [user_id], references: [id])
+}
